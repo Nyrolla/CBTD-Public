@@ -24,5 +24,15 @@ namespace DataAccess
             }
         }
         public DbSet<Category> Categories { get; set; } //The physical tabel
+        //Adding models
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1, Name = "Non-Alcohlic Bevergaes", DisplayOrder = 1},
+                new Category { Id = 2, Name = "Wine", DisplayOrder = 2},
+                new Category { Id = 3, Name = "Snacks", DisplayOrder = 3});
+        }
+
     }
 }
