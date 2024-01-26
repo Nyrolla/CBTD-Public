@@ -7,14 +7,14 @@ namespace CBTDWeb.Pages.Categories
 {
     public class IndexModel : PageModel
     {
-        //local instance of DB Service 
-        private readonly AppicationDbContext _db;
+        //local instance of Unit Of Work Service
+        private readonly UnitOfWork _unitOfWork;
         //our UI front end to support looping through  serval category object
-        public List<Category> objCategoryList;
+        public IEnumerable<Category> objCategoryList;
 
-        public IndexModel(AppicationDbContext db)
+        public IndexModel(UnitOfWork unitOfWork)
         {
-            _db = db;  
+            _unitOfWork = unitOfWork;  
             objCategoryList = new List<Category>();
         }
         public IActionResult OnGet()
@@ -25,7 +25,7 @@ namespace CBTDWeb.Pages.Categories
             //4. file results 
             //5. contect results - a razor page
         {
-            objCategoryList = _db.Categories.ToList();
+            objCategoryList = _unitOfWork.Category.GetAll();
             return Page();  
         }
     }

@@ -7,12 +7,12 @@ namespace CBTDWeb.Pages.Manufacturers
 {
     public class UpsertModel : PageModel
     {
-        private readonly AppicationDbContext _db;
+        private readonly UnitOfWork _unitOfWork;
         [BindProperty]
         public Manufacturer objManufacturer { get; set; }  
-        public UpsertModel(AppicationDbContext db) 
+        public UpsertModel(UnitOfWork unitOfWork) 
         {
-            _db = db;
+            _unitOfWork = unitOfWork;
             objManufacturer = new Manufacturer();  
         }
         public IActionResult OnGet(int? id)
@@ -20,7 +20,7 @@ namespace CBTDWeb.Pages.Manufacturers
             //am I in edit mode?
             if (id != 0)
             {
-                objManufacturer = _db.Manufacturers.Find(id);
+                objManufacturer = _unitOfWork.Manufacturer.GetById(id); 
             }
             if(objManufacturer == null)
             {
@@ -38,16 +38,16 @@ namespace CBTDWeb.Pages.Manufacturers
             //if this is a new category
             if (objManufacturer.Id == 0)
             {
-                _db.Manufacturers.Add(objManufacturer); //not saved yet
+                _unitOfWork.Manufacturer.Add(objManufacturer); //not saved yet
                 TempData["success"] = "Category added Successfully";
             }
             //if exsits
             else
             {
-                _db.Manufacturers.Update(objManufacturer);
+                _unitOfWork.Manufacturer.Update(objManufacturer);
                 TempData["success"] = "Category updated Successfully";
             }
-            _db.SaveChanges();
+            _unitOfWork.Commit();   
             return RedirectToPage("./Index");
         }
     }

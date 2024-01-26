@@ -7,12 +7,12 @@ namespace CBTDWeb.Pages.Manufacturers
 {
     public class DeleteModel : PageModel
     {
-        private readonly AppicationDbContext _db;
+        private readonly UnitOfWork _unitOfWork;
         [BindProperty]
         public Manufacturer objManufacturer { get; set; }  
-        public DeleteModel(AppicationDbContext db) 
+        public DeleteModel(UnitOfWork unitOfWork) 
         {
-            _db = db;
+            _unitOfWork = unitOfWork;
             objManufacturer = new Manufacturer();  
         }
         public IActionResult OnGet(int? id)
@@ -20,7 +20,7 @@ namespace CBTDWeb.Pages.Manufacturers
             //am I in edit mode?
             if (id != 0)
             {
-                objManufacturer = _db.Manufacturers.Find(id);
+                objManufacturer = _unitOfWork.Manufacturer.GetById(id);
             }
             if(objManufacturer == null)
             {
@@ -37,10 +37,10 @@ namespace CBTDWeb.Pages.Manufacturers
             }
             else
             {
-                _db.Manufacturers.Remove(objManufacturer);
+                _unitOfWork.Manufacturer.Delete(objManufacturer);
                 TempData["success"] = "Manufacturer Successfully Delete";
             }
-            _db.SaveChanges();
+            _unitOfWork.Commit();
             return RedirectToPage("./Index");
         }
     }

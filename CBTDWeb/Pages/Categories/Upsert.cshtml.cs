@@ -1,4 +1,5 @@
 using DataAccess;
+using Infrastructure.Interfaces;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -7,20 +8,20 @@ namespace CBTDWeb.Pages.Categories
 {
     public class UpsertModel : PageModel
     {
-        private readonly AppicationDbContext _db;
+        private readonly UnitOfWork _unitOfWork;
         [BindProperty]
         public Category objCategory { get; set; }  
-        public UpsertModel(AppicationDbContext db) 
+        public UpsertModel(UnitOfWork unitOfWork)
         {
-            _db = db;   
-            objCategory = new Category();  
+            _unitOfWork = unitOfWork;
+            objCategory = new Category();
         }
         public IActionResult OnGet(int? id)
         {
             //am I in edit mode?
             if (id != 0)
             {
-                objCategory = _db.Categories.Find(id);
+                objCategory = _unitOfWork.Category.GetById(id);
             }
             if(objCategory == null)
             {
@@ -38,16 +39,16 @@ namespace CBTDWeb.Pages.Categories
             //if this is a new category
             if (objCategory.Id == 0)
             {
-                _db.Categories.Add(objCategory); //not saved yet
+                _unitOfWork.Category.Add(objCategory); //not saved yet
                 TempData["success"] = "Category added Successfully";
             }
             //if exsits
             else
             {
-                _db.Categories.Update(objCategory);
+                _unitOfWork.Category.Update(objCategory);
                 TempData["success"] = "Category updated Successfully";
             }
-            _db.SaveChanges();
+            _unitOfWork.Commit();
             return RedirectToPage("./Index");
         }
     }
