@@ -25,6 +25,8 @@ namespace DataAccess
         }
         public DbSet<Category> Categories { get; set; } //The physical tabel
         public DbSet<Manufacturer> Manufacturers { get; set; }
+
+        public DbSet<Product> Products { get; set; }
         //Adding models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,7 +35,7 @@ namespace DataAccess
                 new Category { Id = 1, Name = "Non-Alcohlic Bevergaes", DisplayOrder = 1},
                 new Category { Id = 2, Name = "Wine", DisplayOrder = 2},
                 new Category { Id = 3, Name = "Snacks", DisplayOrder = 3});
-
+            
             modelBuilder.Entity<Manufacturer>().HasData(
                 new Manufacturer { Id = 1, Name = "Coca-Cola" },
                 new Manufacturer { Id = 2, Name = "Amazon" },
