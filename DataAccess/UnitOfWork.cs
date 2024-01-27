@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Interfaces;
 using Infrastructure.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace DataAccess
         public IGenericRepository<Category> _Category;
 
         public IGenericRepository<Manufacturer> _Manufacturer;
+        public IGenericRepository<Product> _Product;
 
         public IGenericRepository<Category> Category
         {
@@ -42,6 +44,17 @@ namespace DataAccess
                 return _Manufacturer;
             }
         }
+        public IGenericRepository<Product> Product
+        {
+            get
+            {
+                if (_Product == null)
+                {
+                    _Product = new GenericRepository<Product>(_dbContext);
+                }
+                return _Product;
+            }
+        }
 
         public async Task<int> ComitAsync()
         {
@@ -56,6 +69,10 @@ namespace DataAccess
         public void Dispose()
         {
             _dbContext.Dispose();
+        }
+        public void DetachEntity<T>(T entity) where T : class
+        {
+            _dbContext.Entry(entity).State = EntityState.Detached;
         }
     }
 }
