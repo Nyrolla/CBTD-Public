@@ -57,98 +57,119 @@ namespace CBTDWeb.Pages.Products
             }
             return Page();
         }
-        public IActionResult OnPost(int? id) 
+        public IActionResult OnPost(int? id)
         {
-            //determine root path
+            // determine root path
             string webRootPath = _webHostEnvironment.WebRootPath;
-            //Retreive the files 
+
+            // retrieve the files
             var files = HttpContext.Request.Form.Files;
 
-            //if the progect is new (create)
+            // if the product is new (create)
             if (objProduct.Id == 0)
             {
-                //was there an image uploaded?
+                // validate the 'Description' before saving
+                if (string.IsNullOrEmpty(objProduct.Description))
+                {
+                    ModelState.AddModelError("objProduct.Description", "Please enter a product description.");
+                    // handle the validation error, e.g., return to the page with errors
+                    return Page();
+                }
+
+                // was there an image uploaded?
                 if (files.Count > 0)
                 {
-                    //create an unique identifier for image name
+                    // create a unique identifier for the image name
                     string fileName = Guid.NewGuid().ToString();
 
-                    //create variable to hold a path to images/products folder
+                    // create variable to hold a path to images/products folder
                     var uploads = Path.Combine(webRootPath, @"images\products\");
 
-                    //get and preserve the extension type
+                    // get and preserve the extension type
                     var extension = Path.GetExtension(files[0].FileName);
 
-                    //create the full path of the item to stream
-                    var fullPath = uploads + fileName + extension;
+                    // create the full path of the item to stream
+                    var fullPath = Path.Combine(uploads, fileName + extension);
 
-                    //Stream the binary files to server
+                    // stream the binary files to server
                     using var fileStream = System.IO.File.Create(fullPath);
                     files[0].CopyTo(fileStream);
 
-                    //associate the actual real URL path and save to DB
+                    // associate the actual real URL path and save to DB
                     objProduct.ImageURL = @"\images\products\" + fileName + extension;
                 }
-                //add this new product internally
+
+                // add this new product internally
                 _unitOfWork.Product.Add(objProduct);
             }
-            //the item exists already, so we're updating it
+            // the item exists already, so we're updating it
             else
             {
-                /*
-                 * get the product again from the DB because binding is on, and we 
-                 * need to process the phyical iamge separately from the binded
-                 * property holding the URL string
-                 */
+                // get the product again from the DB because binding is on,
+                // and we need to process the physical image separately from the
+                // bound property holding the URL string
                 var objProductFromDb = _unitOfWork.Product.Get(p => p.Id == objProduct.Id);
-                //Was there an image uplaoded
+
+                // validate the 'Description' before updating
+                if (string.IsNullOrEmpty(objProduct.Description))
+                {
+                    ModelState.AddModelError("objProduct.Description", "Please enter a product description.");
+                    // handle the validation error, e.g., return to the page with errors
+                    return Page();
+                }
+
+                // was there an image uploaded
                 if (files.Count > 0)
                 {
-                    //create an unique identifier for image name
+                    // create a unique identifier for the image name
                     string fileName = Guid.NewGuid().ToString();
 
-                    //create variable to hold a path to images/products folder
+                    // create variable to hold a path to images/products folder
                     var uploads = Path.Combine(webRootPath, @"images\products\");
 
-                    //get and preserve the extension type
+                    // get and preserve the extension type
                     var extension = Path.GetExtension(files[0].FileName);
 
-                    if(objProductFromDb.ImageURL != null)
+                    if (objProductFromDb.ImageURL != null)
                     {
-                        var imagePath = Path.Combine(webRootPath,objProduct.ImageURL.TrimStart('\\'));
+                        var imagePath = Path.Combine(webRootPath, objProduct.ImageURL.TrimStart('\\'));
 
-                        //if image exist physically
+                        // if image exists physically
                         if (System.IO.File.Exists(imagePath))
                         {
                             System.IO.File.Delete(imagePath);
                         }
                     }
-                    //create the full path of the item to stream
-                    var fullPath = uploads + fileName + extension;
+                    // create the full path of the item to stream
+                    var fullPath = Path.Combine(uploads, fileName + extension);
 
-                    //Stream the binary files to server
+                    // stream the binary files to server
                     using var fileStream = System.IO.File.Create(fullPath);
                     files[0].CopyTo(fileStream);
 
-                    //associate the actual real URL path and save to DB
+                    // associate the actual real URL path and save to DB
                     objProduct.ImageURL = @"\images\products\" + fileName + extension;
-
                 }
-                else //We're trying to add image for the 1st time
+                else // we're trying to add an image for the 1st time
                 {
-                    objProductFromDb.ImageURL = objProduct.ImageURL;
-
+                    // Update only if a new image is selected
+                    if (!string.IsNullOrEmpty(objProduct.ImageURL))
+                    {
+                        objProductFromDb.ImageURL = objProduct.ImageURL;
+                    }
                 }
-                // Detach the entity from the DbContext using the UnitOfWork
+
+                // detach the entity from the DbContext using the UnitOfWork
                 _unitOfWork.DetachEntity(objProductFromDb);
 
-                //Update the existing product
-                _unitOfWork.Product.Update(objProduct);
+                // update the existing product
+                _unitOfWork.Product.Update(objProductFromDb);
             }
-            //saving to database
+
+            // saving to database
             _unitOfWork.Commit();
 
-            //redirect to another page
+            // redirect to another page
             return RedirectToPage("./Index");
         }
     }
