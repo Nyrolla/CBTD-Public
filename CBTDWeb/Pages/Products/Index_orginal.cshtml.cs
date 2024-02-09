@@ -5,12 +5,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace CBTDWeb.Pages.Products
 {
-    public class IndexlModel : PageModel
+    public class Index_orginalModel : PageModel
     {
-        /* Puposely commented out Datatables will handle this with API call and JS
         private readonly UnitOfWork _unitOfWork;
         public IEnumerable<Product> objProductList;
-        public IndexlModel(UnitOfWork unitOfWork)
+        public Index_orginalModel(UnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
             objProductList = new List<Product>();
@@ -20,6 +19,5 @@ namespace CBTDWeb.Pages.Products
             objProductList = _unitOfWork.Product.GetAll();
             return Page();
         }
-        */
     }
 }

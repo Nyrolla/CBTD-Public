@@ -61,14 +61,14 @@ namespace DataAccess
 
                 if (!trackChanges == null) //is false 
                 {
-                    return _dbContext.Set<T>()
+                    return queryable
                         .Where(predicate)
                         .AsNoTracking()
                         .FirstOrDefault();
                 }
                 else //we are tracking changes
                 {
-                    return _dbContext.Set<T>()
+                    return queryable
                        .Where(predicate)
                        .FirstOrDefault();
 
